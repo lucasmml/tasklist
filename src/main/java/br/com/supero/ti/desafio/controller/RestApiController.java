@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.mysql.jdbc.StringUtils;
+
 import br.com.supero.ti.desafio.model.Task;
 import br.com.supero.ti.desafio.services.TaskService;
 import br.com.supero.ti.desafio.util.CustomErrorType;
@@ -48,6 +50,7 @@ public class RestApiController {
 		return new ResponseEntity<Task>(task, HttpStatus.OK);
 	}
 
+	@CrossOrigin
 	@RequestMapping(value = "/task/{id}", method = RequestMethod.PUT)
 	public ResponseEntity<?> updateTask(@PathVariable("id") long id, @RequestBody Task task) {
 		logger.info("Updating Task with id {}", id);
@@ -59,9 +62,15 @@ public class RestApiController {
 			return new ResponseEntity(new CustomErrorType("Unable to upate. Task with id " + id + " not found."), HttpStatus.NOT_FOUND);
 		}
 
-		currentTask.setTitle(task.getTitle());
-		currentTask.setDescription(task.getDescription());
-		currentTask.setStatus(task.getStatus());
+		if (!StringUtils.isNullOrEmpty(task.getTitle())) {
+			currentTask.setTitle(task.getTitle());
+		}
+		if (!StringUtils.isNullOrEmpty(task.getDescription())) {
+			currentTask.setDescription(task.getDescription());
+		}
+		if (!StringUtils.isNullOrEmpty(task.getStatus())) {
+			currentTask.setStatus(task.getStatus().toUpperCase());
+		}
 
 		taskService.updateTask(currentTask);
 		return new ResponseEntity<Task>(currentTask, HttpStatus.OK);
